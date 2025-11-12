@@ -45,5 +45,4 @@ def get_balance(address: str):
 
     balance_wei_hex = data["result"]
     balance_eth = wei_to_eth(balance_wei_hex)
-
     return {"balance": balance_eth}
