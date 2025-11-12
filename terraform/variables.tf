@@ -25,3 +25,8 @@ variable "state_bucket_location" {
   type    = string
   default = "US"
 }
+
+variable "artifact_registry_location" {
+  type    = string
+  default = "us-central1"
+}

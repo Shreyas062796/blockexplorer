@@ -24,12 +24,12 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
-      - name: Configure Docker Auth for GCR
-        run: gcloud auth configure-docker gcr.io --quiet
+      - name: Configure Docker Auth for Artifact Registry
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
       - name: Build Docker image
         run: |
-          IMAGE="gcr.io/${{ secrets.GCP_PROJECT }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          IMAGE="us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/${{ env.SERVICE_NAME }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
           docker build -t $IMAGE .
           echo "IMAGE=$IMAGE" >> $GITHUB_ENV
 
