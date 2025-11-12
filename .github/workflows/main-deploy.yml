@@ -62,22 +62,39 @@ jobs:
             -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
             -backend-config="prefix=cloudrun/${{ env.SERVICE_NAME }}"
 
+      - name: Import Existing Resources (if needed)
+        working-directory: terraform
+        env:
+          GCP_REGION: ${{ secrets.GCP_REGION }}
+        run: |
+          REGION=${GCP_REGION:-us-central1}
+          # Import Artifact Registry repository if it exists and isn't in state
+          terraform import google_artifact_registry_repository.service projects/${{ secrets.GCP_PROJECT }}/locations/${REGION}/repositories/${{ env.SERVICE_NAME }} || true
+          # Import state bucket if it exists and isn't in state
+          terraform import google_storage_bucket.terraform_state ${{ secrets.TF_STATE_BUCKET }} || true
+
       - name: Terraform Plan
         working-directory: terraform
+        env:
+          GCP_REGION: ${{ secrets.GCP_REGION }}
         run: |
+          REGION=${GCP_REGION:-us-central1}
           terraform plan \
             -var="project=${{ secrets.GCP_PROJECT }}" \
-            -var="region=${{ secrets.GCP_REGION }}" \
+            -var="region=${REGION}" \
             -var="image=${{ env.IMAGE }}" \
             -var="state_bucket_name=${{ secrets.TF_STATE_BUCKET }}"
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         working-directory: terraform
+        env:
+          GCP_REGION: ${{ secrets.GCP_REGION }}
         run: |
+          REGION=${GCP_REGION:-us-central1}
           terraform apply -auto-approve \
             -var="project=${{ secrets.GCP_PROJECT }}" \
-            -var="region=${{ secrets.GCP_REGION }}" \
+            -var="region=${REGION}" \
             -var="image=${{ env.IMAGE }}" \
             -var="state_bucket_name=${{ secrets.TF_STATE_BUCKET }}"
 
