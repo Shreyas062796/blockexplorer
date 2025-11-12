@@ -9,6 +9,17 @@ INFURA_ENDPOINT = os.getenv("INFURA_ENDPOINT", "https://mainnet.infura.io/v3/f3c
 
 app = FastAPI(title="Ethereum Balance API")
 
+@app.get("/")
+async def root():
+    return {
+        "service": "Ethereum Balance API",
+        "version": "1.0.0",
+        "endpoints": {
+            "health": "/health",
+            "balance": "/address/balance/{address}"
+        }
+    }
+
 class BalanceResponse(BaseModel):
     balance: Decimal
 
