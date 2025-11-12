@@ -5,9 +5,13 @@ import requests
 import os
 from decimal import Decimal
 
-INFURA_ENDPOINT = os.getenv("INFURA_ENDPOINT", "https://mainnet.infura.io/v3/f3c095656381439aa1acb1722d9c62f2")
+INFURA_ENDPOINT = os.getenv(
+    "INFURA_ENDPOINT",
+    "https://mainnet.infura.io/v3/f3c095656381439aa1acb1722d9c62f2"
+)
 
 app = FastAPI(title="Ethereum Balance API")
+
 
 @app.get("/")
 async def root():
@@ -20,13 +24,16 @@ async def root():
         }
     }
 
+
 class BalanceResponse(BaseModel):
     balance: Decimal
+
 
 def wei_to_eth(wei_hex: str) -> Decimal:
     wei = int(wei_hex, 16)
     eth = Decimal(wei) / Decimal(10**18)
     return eth.quantize(Decimal("0.000000000000000001"))
+
 
 @app.get("/address/balance/{address}", response_model=BalanceResponse)
 def get_balance(address: str):
