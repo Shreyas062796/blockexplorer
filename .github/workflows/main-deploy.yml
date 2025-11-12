@@ -26,7 +26,7 @@ jobs:
 
       - name: Authenticate to Google Cloud for Docker
         run: |
-          echo "${{ secrets.GCP_SA_KEY }}" > ${HOME}/gcp-key.json
+          echo "${{ secrets.GCP_SA_KEY }}" | base64 --decode > ${HOME}/gcp-key.json || echo "${{ secrets.GCP_SA_KEY }}" > ${HOME}/gcp-key.json
           gcloud auth activate-service-account --key-file=${HOME}/gcp-key.json
           gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
