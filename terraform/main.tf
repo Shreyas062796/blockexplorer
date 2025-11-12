@@ -14,7 +14,7 @@ resource "google_cloud_run_service" "service" {
     }
   }
 
-  traffics {
+  traffic {
     percent         = 100
     latest_revision = true
   }
