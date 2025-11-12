@@ -26,7 +26,9 @@ jobs:
 
       - name: Authenticate to Google Cloud for Docker
         run: |
-          # setup-gcloud already authenticates, but we need to explicitly configure Docker
+          # Write service account key to file and activate it
+          echo '${{ secrets.GCP_SA_KEY }}' > ${HOME}/gcp-key.json
+          gcloud auth activate-service-account --key-file=${HOME}/gcp-key.json --quiet
           gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
           # Use access token for Docker login
           gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin us-central1-docker.pkg.dev
