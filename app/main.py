@@ -36,6 +36,23 @@ def wei_to_eth(wei_hex: str) -> Decimal:
     return eth.quantize(Decimal("0.000000000000000001"))
 
 
+@app.get("/transaction/{tx_hash}")
+async def get_transaction(tx_hash: str):
+    
+    payload = {
+        "jsonrpc": "2.0",
+        "method": "eth_getTransactionByHash",
+        "params": [tx_hash],
+        "id": 1,
+    }
+
+    try:
+        resp = requests.post(INFURA_ENDPOINT, json=payload, timeout=10)
+        resp.raise_for_status()
+        return resp.json()
+    except requests.RequestException as e:
+        raise HTTPException(status_code=502, detail=f"Upstream request failed: {str(e)}")
+
 @app.get("/address/balance/{address}", response_model=BalanceResponse)
 def get_balance(address: str):
     # Basic address validation (length, 0x)
