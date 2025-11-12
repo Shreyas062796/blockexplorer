@@ -1,13 +1,14 @@
 # app/main.py
+from decimal import Decimal
+import os
+
+import requests
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import requests
-import os
-from decimal import Decimal
 
 INFURA_ENDPOINT = os.getenv(
     "INFURA_ENDPOINT",
-    "https://mainnet.infura.io/v3/f3c095656381439aa1acb1722d9c62f2"
+    "https://mainnet.infura.io/v3/f3c095656381439aa1acb1722d9c62f2",
 )
 
 app = FastAPI(title="Ethereum Balance API")
@@ -20,8 +21,8 @@ async def root():
         "version": "1.0.0",
         "endpoints": {
             "health": "/health",
-            "balance": "/address/balance/{address}"
-        }
+            "balance": "/address/balance/{address}",
+        },
     }
 
 
@@ -45,14 +46,16 @@ def get_balance(address: str):
         "jsonrpc": "2.0",
         "method": "eth_getBalance",
         "params": [address, "latest"],
-        "id": 1
+        "id": 1,
     }
 
     try:
         resp = requests.post(INFURA_ENDPOINT, json=payload, timeout=10)
         resp.raise_for_status()
     except requests.RequestException as e:
-        raise HTTPException(status_code=502, detail=f"Upstream request failed: {str(e)}")
+        raise HTTPException(
+            status_code=502, detail=f"Upstream request failed: {str(e)}"
+        )
 
     data = resp.json()
     if "error" in data:
