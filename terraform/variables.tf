@@ -1,5 +1,6 @@
 variable "project" {
   type = string
+  default = "blockexplorer-478015"
 }
 
 variable "region" {
