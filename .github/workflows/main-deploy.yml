@@ -53,26 +53,29 @@ jobs:
 
       - name: Terraform Init
         working-directory: terraform
-        run: terraform init \
-          -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
-          -backend-config="prefix=cloudrun/${{ env.SERVICE_NAME }}"
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="prefix=cloudrun/${{ env.SERVICE_NAME }}"
 
       - name: Terraform Plan
         working-directory: terraform
-        run: terraform plan \
-          -var="project=${{ secrets.GCP_PROJECT }}" \
-          -var="region=${{ secrets.GCP_REGION }}" \
-          -var="image=${{ env.IMAGE }}" \
-          -var="state_bucket_name=${{ secrets.TF_STATE_BUCKET }}"
+        run: |
+          terraform plan \
+            -var="project=${{ secrets.GCP_PROJECT }}" \
+            -var="region=${{ secrets.GCP_REGION }}" \
+            -var="image=${{ env.IMAGE }}" \
+            -var="state_bucket_name=${{ secrets.TF_STATE_BUCKET }}"
 
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         working-directory: terraform
-        run: terraform apply -auto-approve \
-          -var="project=${{ secrets.GCP_PROJECT }}" \
-          -var="region=${{ secrets.GCP_REGION }}" \
-          -var="image=${{ env.IMAGE }}" \
-          -var="state_bucket_name=${{ secrets.TF_STATE_BUCKET }}"
+        run: |
+          terraform apply -auto-approve \
+            -var="project=${{ secrets.GCP_PROJECT }}" \
+            -var="region=${{ secrets.GCP_REGION }}" \
+            -var="image=${{ env.IMAGE }}" \
+            -var="state_bucket_name=${{ secrets.TF_STATE_BUCKET }}"
 
       - name: Output Cloud Run URL
         working-directory: terraform
