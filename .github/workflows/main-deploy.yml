@@ -1,0 +1,62 @@
+name: Main Deploy (Terraform)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  SERVICE_NAME: eth-balance-service
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Configure Docker Auth for GCR
+        run: gcloud auth configure-docker --quiet
+
+      - name: Build Docker image
+        run: |
+          IMAGE="gcr.io/${{ secrets.GCP_PROJECT }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          docker build -t $IMAGE .
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+      - name: Push image to GCR
+        run: docker push $IMAGE
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init \
+          -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+          -backend-config="prefix=cloudrun/${{ env.SERVICE_NAME }}"
+
+      - name: Terraform Plan
+        working-directory: terraform
+        run: terraform plan \
+          -var="project=${{ secrets.GCP_PROJECT }}" \
+          -var="region=${{ secrets.GCP_REGION }}" \
+          -var="image=${{ env.IMAGE }}"
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        working-directory: terraform
+        run: terraform apply -auto-approve \
+          -var="project=${{ secrets.GCP_PROJECT }}" \
+          -var="region=${{ secrets.GCP_REGION }}" \
+          -var="image=${{ env.IMAGE }}"
+
+      - name: Output Cloud Run URL
+        working-directory: terraform
+        run: terraform output service_url

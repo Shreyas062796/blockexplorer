@@ -1,0 +1,42 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r app/requirements.txt
+          pip install black flake8 pytest requests
+
+      - name: Lint code
+        run: flake8 app --max-line-length 100
+
+      - name: Check formatting
+        run: black --check app
+
+      - name: Run unit tests
+        run: pytest -v
+
+      - name: Validate Terraform
+        run: |
+          cd terraform
+          terraform init -backend=false
+          terraform validate
+
+      - name: Docker Build Validation
+        run: docker build -t eth-balance:pr-check .
