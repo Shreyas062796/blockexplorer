@@ -83,7 +83,8 @@ class TestBalanceEndpoint:
         assert response.status_code == 200
         data = response.json()
         assert "balance" in data
-        assert data["balance"] == "1.0"
+        # FastAPI serializes Decimal, check the numeric value
+        assert Decimal(str(data["balance"])) == Decimal("1.0")
         mock_post.assert_called_once()
 
     @patch('main.requests.post')
@@ -103,7 +104,8 @@ class TestBalanceEndpoint:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["balance"] == "0"
+        # FastAPI serializes Decimal, check the numeric value
+        assert Decimal(str(data["balance"])) == Decimal("0")
 
     def test_get_balance_invalid_address_short(self):
         """Test balance endpoint with invalid short address."""
@@ -175,7 +177,8 @@ class TestBalanceEndpoint:
     @patch('main.requests.post')
     def test_get_balance_request_exception(self, mock_post):
         """Test balance endpoint when request fails."""
-        mock_post.side_effect = Exception("Connection error")
+        import requests
+        mock_post.side_effect = requests.RequestException("Connection error")
 
         address = "0xc94770007dda54cF92009BFF0dE90c06F603a09f"
         response = client.get(f"/address/balance/{address}")
@@ -187,8 +190,9 @@ class TestBalanceEndpoint:
     @patch('main.requests.post')
     def test_get_balance_http_error(self, mock_post):
         """Test balance endpoint when HTTP request returns error status."""
+        import requests
         mock_response = Mock()
-        mock_response.raise_for_status.side_effect = Exception("HTTP 500")
+        mock_response.raise_for_status.side_effect = requests.HTTPError("HTTP 500")
         mock_post.return_value = mock_response
 
         address = "0xc94770007dda54cF92009BFF0dE90c06F603a09f"
