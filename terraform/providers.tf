@@ -6,6 +6,10 @@ terraform {
       version = ">= 4.0"
     }
   }
+  # Backend is configured via CLI in CI/CD with -backend-config flags
+  backend "gcs" {
+    # bucket and prefix are provided via -backend-config in CI/CD
+  }
 }
 
 provider "google" {

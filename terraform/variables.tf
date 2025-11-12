@@ -14,11 +14,12 @@ variable "service_name" {
 
 variable "image" {
   type    = string
-  default = "" # e.g. gcr.io/<PROJECT>/eth-balance:latest
+  default = "" # e.g. us-central1-docker.pkg.dev/<PROJECT>/eth-balance-service/eth-balance-service:<tag>
 }
 
 variable "state_bucket_name" {
-  type = string
+  type    = string
+  default = ""
 }
 
 variable "state_bucket_location" {
